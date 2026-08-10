@@ -59,7 +59,12 @@ app.use('/api', (req, res, next) => {
 });
 
 // ─── BANCO ────────────────────────────────────────────────────────
-const db = new Database(path.join(__dirname, 'crm.db'));
+// Usa volume persistente no Railway, ou pasta local em desenvolvimento
+const DB_PATH = process.env.RAILWAY_VOLUME_MOUNT_PATH
+  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'crm.db')
+  : path.join(__dirname, 'crm.db');
+console.log('📂 Banco de dados em:', DB_PATH);
+const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
 // Cria todas as tabelas
