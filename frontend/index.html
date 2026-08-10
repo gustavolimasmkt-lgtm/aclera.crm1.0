@@ -15,7 +15,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Manifest PWA -->
-<link rel="manifest" href="/manifest.json">
 
 <!-- Favicon -->
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
@@ -549,6 +548,21 @@ label{font-size:11px;color:var(--t2);display:block;margin-bottom:3px}
   .topbar { padding-top: env(safe-area-inset-top); height: calc(52px + env(safe-area-inset-top)); }
 }
 </style>
+
+<script>
+// Desregistra qualquer Service Worker ativo
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(reg) { reg.unregister(); });
+  });
+  // Limpa todos os caches
+  if ('caches' in window) {
+    caches.keys().then(function(keys) {
+      keys.forEach(function(k) { caches.delete(k); });
+    });
+  }
+}
+</script>
 </head>
 <body>
 
@@ -586,8 +600,7 @@ label{font-size:11px;color:var(--t2);display:block;margin-bottom:3px}
     </nav>
     <div class="tb-right">
       <button class="btn btn-p" id="btn-novo-lead" style="font-size:12px;padding:6px 12px">+ Lead</button>
-      <button id="btn-instalar-app" style="display:none;align-items:center;gap:4px;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--brand);background:transparent;color:var(--brand);cursor:pointer;font-family:inherit">⬇ Instalar</button>
-      <button class="btn-logout" id="btn-logout">Sair</button>
+<button class="btn-logout" id="btn-logout">Sair</button>
     </div>
   </div>
 
@@ -2251,7 +2264,6 @@ function closeModal(t) { document.getElementById('modal-' + t).classList.remove(
 function bindEventos() {
   // Nav
   document.getElementById('btn-logout').addEventListener('click', logout);
-  document.getElementById('btn-instalar-app')?.addEventListener('click', instalarApp);
   ['leads', 'tarefas', 'followup', 'matches', 'kanban', 'ia', 'estoque', 'relatorio', 'importar', 'config'].forEach(v => {
     document.getElementById('ni-' + v)?.addEventListener('click', () => nav(v));
   });
@@ -2778,13 +2790,6 @@ function initAdvFilters() {
 
 // Prompt de instalação no Android
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Mostra botão de instalação após login
-  const installBtn = document.getElementById('btn-instalar-app');
-  if (installBtn) installBtn.style.display = 'flex';
-});
 </script>
 
 </div><!-- /app -->
