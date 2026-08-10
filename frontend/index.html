@@ -652,6 +652,7 @@ if ('serviceWorker' in navigator) {
                 <div class="chip" data-val="pediu_proposta">Pediu proposta</div>
                 <div class="chip" data-val="em_negociacao">Em negociação</div>
                 <div class="chip" data-val="sumiu">Sumiu</div>
+                <div class="chip" data-val="compra_futura">🔮 Compra futura</div>
                 <div class="chip" data-val="fechado">Fechado</div>
               </div>
             </div>
@@ -1014,6 +1015,7 @@ if ('serviceWorker' in navigator) {
                   <option value="pediu_proposta">Pediu proposta</option>
                   <option value="em_negociacao">Em negociação</option>
                   <option value="sumiu">Sumiu</option>
+                  <option value="compra_futura">🔮 Compra futura</option>
                   <optgroup label="──────────">
                   <option value="fechado_ganho">✅ Fechado — Comprou</option>
                   <option value="comprou_outro">🔴 Comprou em outro lugar</option>
@@ -1136,7 +1138,7 @@ let leads = [], veiculos = [], selectedIds = new Set();
 let filtros = { temp: '', etiq: '', est: '', parc: '', troca: false, dataIni: '', dataFim: '' };
 let iaConvDados = null;
 
-const estagioLabel = { novo: 'Novo', interessado: 'Interessado', pediu_proposta: 'Pediu proposta', em_negociacao: 'Em negociação', sumiu: 'Sumiu', fechado: 'Fechado', fechado_ganho: '✅ Comprou', comprou_outro: '🔴 Outro lugar', desqualificado: '⛔ Desqualificado', perdido: '❌ Perdido' };
+const estagioLabel = { novo: 'Novo', interessado: 'Interessado', pediu_proposta: 'Pediu proposta', em_negociacao: 'Em negociação', sumiu: 'Sumiu', compra_futura: '🔮 Compra futura', fechado_ganho: '✅ Comprou', comprou_outro: '🔴 Outro lugar', desqualificado: '⛔ Desqualificado', perdido: '❌ Perdido' };
 const tempColor = { quente: '#ef4444', morno: '#f59e0b', frio: '#3b82f6' };
 const tipoLabel = { followup: '🔔 Follow-up', ligacao: '📞 Ligação', visita: '🚗 Visita', proposta: '📄 Proposta', outro: '📌 Outro', tarefa_concluida: '✅ Concluída', ia: '🤖 IA', nota: '📝 Nota' };
 
@@ -2524,6 +2526,7 @@ const estagioConfig = {
   pediu_proposta: { label: 'Pediu proposta',     bg: '#3b0764', color: '#d8b4fe' },
   em_negociacao:  { label: 'Em negociação',      bg: '#451a03', color: '#fbbf24' },
   sumiu:          { label: 'Sumiu',              bg: '#374151', color: '#9ca3af' },
+  compra_futura:  { label: '🔮 Compra futura',    bg: '#1e1b4b', color: '#a5b4fc' },
   fechado_ganho:  { label: '✅ Comprou',          bg: '#14532d', color: '#4ade80' },
   comprou_outro:  { label: '🔴 Outro lugar',      bg: '#450a0a', color: '#f87171' },
   desqualificado: { label: '⛔ Desqualificado',   bg: '#292524', color: '#78716c' },
