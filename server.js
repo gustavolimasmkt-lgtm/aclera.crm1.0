@@ -852,7 +852,7 @@ app.get('/api/relatorio/semanal', (req, res) => {
 
 // ─── KANBAN ───────────────────────────────────────────────────────
 app.get('/api/kanban', (req, res) => {
-  const estagios = ['novo','interessado','pediu_proposta','em_negociacao','sumiu','fechado_ganho','comprou_outro','desqualificado','perdido'];
+  const estagios = ['novo','interessado','pediu_proposta','em_negociacao','sumiu','compra_futura','fechado_ganho','comprou_outro','desqualificado','perdido'];
   const resultado = {};
   estagios.forEach(est => {
     resultado[est] = db.prepare(`SELECT id,nome,telefone,carro_interesse,parcela_max,temperatura,etiqueta,ai_score, CAST(julianday('now','localtime') - julianday(updated_at) AS INTEGER) as dias_parado, (SELECT COUNT(*) FROM tarefas WHERE lead_id=leads.id AND concluida=0) as tarefas_pendentes FROM leads WHERE estagio=? ORDER BY ai_score DESC, updated_at DESC LIMIT 30`).all(est);
