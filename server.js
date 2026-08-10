@@ -1067,6 +1067,18 @@ app.get('/api/match/rapido/:veiculo_id', (req, res) => {
   res.json({ veiculo: v, leads, total: leads.length });
 });
 
+// Arquivos PWA — servidos explicitamente com Content-Type correto
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'frontend', 'sw.js'));
+});
+
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.sendFile(path.join(__dirname, 'frontend', 'manifest.json'));
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'frontend', 'index.html')));
 
 app.listen(PORT, () => {
