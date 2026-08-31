@@ -261,6 +261,11 @@ tr:hover .row-actions{opacity:1}
 .flex{display:flex}.gap4{gap:4px}.gap6{gap:6px}.gap8{gap:8px}
 .ml-auto{margin-left:auto}
 .sep{width:1px;height:16px;background:var(--b2);flex-shrink:0}
+
+/* BULK BAR */
+.bulk-bar{display:none;padding:8px 12px;background:#1e3a5f;border-bottom:1px solid var(--acc);align-items:center;gap:8px;flex-shrink:0}
+.bulk-bar.show{display:flex}
+.bulk-info{font-size:12px;color:#60a5fa;font-weight:600}
 </style>
 </head>
 <body>
@@ -321,6 +326,15 @@ tr:hover .row-actions{opacity:1}
           </div>
         </div>
 
+        <!-- Bulk bar -->
+        <div class="bulk-bar" id="bulk-bar">
+          <span class="bulk-info" id="bulk-info">0 selecionados</span>
+          <button class="btn btn-g" id="bulk-waspeed" style="font-size:11px;padding:4px 10px">📋 Copiar números</button>
+          <button class="btn btn-g" id="bulk-excel" style="font-size:11px;padding:4px 10px">📊 Excel</button>
+          <button class="btn btn-red" id="bulk-del" style="font-size:11px;padding:4px 10px">🗑 Excluir</button>
+          <button class="btn btn-g" id="bulk-cancel" style="font-size:11px;padding:4px 10px;margin-left:auto">✕ Cancelar</button>
+        </div>
+
         <!-- Toolbar -->
         <div class="leads-toolbar">
           <input class="search-box" id="busca" placeholder="🔍 nome, telefone..." type="text">
@@ -344,6 +358,7 @@ tr:hover .row-actions{opacity:1}
         <div class="leads-wrap">
           <table class="tbl">
             <thead><tr>
+              <th style="width:24px"><input type="checkbox" id="sel-todos" style="width:14px;height:14px;cursor:pointer;accent-color:var(--acc)"></th>
               <th style="width:200px">Nome</th>
               <th>Telefone</th>
               <th>Carro</th>
@@ -771,6 +786,7 @@ function renderLeads(lista) {
     const estNome = l.estagio_nome || '—';
     const selecionado = leadAtivo?.id === l.id ? 'selecionado' : '';
     return `<tr class="${selecionado}" data-id="${l.id}">
+      <td style="width:24px"><input type="checkbox" class="lead-chk" data-id="${l.id}" style="width:14px;height:14px;cursor:pointer;accent-color:var(--acc)"></td>
       <td><div class="td-nome">
         <div class="av" style="background:${estCor}44;color:${estCor}">${ini(l.nome)}</div>
         <span style="font-weight:500">${l.nome}${l.duplicado?'<span class="dup-badge">dup</span>':''}</span>
@@ -1506,6 +1522,77 @@ document.querySelectorAll('.modal-bg').forEach(bg => bg.addEventListener('click'
 
 // ─── INIT ────────────────────────────────────────────────────────
 verificarSessao();
+
+// ─── SELEÇÃO / BULK ──────────────────────────────────────────────
+let selecionados = new Set();
+
+function atualizarBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const info = document.getElementById('bulk-info');
+  if (selecionados.size > 0) {
+    bar.classList.add('show');
+    info.textContent = selecionados.size + ' selecionado' + (selecionados.size > 1 ? 's' : '');
+  } else {
+    bar.classList.remove('show');
+  }
+  // Atualiza checkboxes
+  document.querySelectorAll('.lead-chk').forEach(chk => {
+    chk.checked = selecionados.has(Number(chk.dataset.id));
+  });
+  const todos = document.getElementById('sel-todos');
+  if (todos) {
+    const visiveis = document.querySelectorAll('.lead-chk').length;
+    todos.checked = visiveis > 0 && selecionados.size === visiveis;
+    todos.indeterminate = selecionados.size > 0 && selecionados.size < visiveis;
+  }
+}
+
+document.getElementById('sel-todos')?.addEventListener('change', e => {
+  document.querySelectorAll('.lead-chk').forEach(chk => {
+    if (e.target.checked) selecionados.add(Number(chk.dataset.id));
+    else selecionados.delete(Number(chk.dataset.id));
+    chk.checked = e.target.checked;
+  });
+  atualizarBulkBar();
+});
+
+document.getElementById('leads-body').addEventListener('mousedown', e => {
+  if (e.target.classList.contains('lead-chk')) e.stopPropagation();
+});
+document.getElementById('leads-body').addEventListener('change', e => {
+  if (!e.target.classList.contains('lead-chk')) return;
+  const id = Number(e.target.dataset.id);
+  if (e.target.checked) selecionados.add(id);
+  else selecionados.delete(id);
+  atualizarBulkBar();
+});
+
+document.getElementById('bulk-cancel')?.addEventListener('click', () => {
+  selecionados.clear();
+  atualizarBulkBar();
+});
+
+document.getElementById('bulk-waspeed')?.addEventListener('click', () => {
+  const ids = [...selecionados];
+  const nums = leads.filter(l => ids.includes(l.id)).map(l => l.telefone.replace(/\D/g,''));
+  navigator.clipboard.writeText(nums.join('\n')).then(() => toast(nums.length + ' números copiados!', 'ok'));
+});
+
+document.getElementById('bulk-excel')?.addEventListener('click', () => {
+  const ids = [...selecionados].join(',');
+  window.open('/api/leads/exportar/excel?ids=' + ids + '&token=' + token, '_blank');
+});
+
+document.getElementById('bulk-del')?.addEventListener('click', async () => {
+  const n = selecionados.size;
+  if (!confirm('Excluir ' + n + ' lead(s)? Esta ação não pode ser desfeita.')) return;
+  for (const id of selecionados) {
+    await api('/api/leads/' + id, 'DELETE').catch(() => {});
+  }
+  selecionados.clear();
+  toast(n + ' lead(s) excluído(s)', 'ok');
+  carregarLeads(); carregarDashboard();
+});
 </script>
 </body>
 </html>
